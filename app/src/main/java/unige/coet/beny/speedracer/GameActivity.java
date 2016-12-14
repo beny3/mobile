@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ConfigurationInfo;
 import android.content.res.AssetManager;
 import android.hardware.SensorManager;
@@ -72,7 +73,14 @@ public class GameActivity extends AppCompatActivity {
         return ObjectLoader.load(assetManager, name);
     }
 
+    /**
+     * This method is called when the player enters in a collision with an
+     * object in the game. It stops the current game and launches an activity
+     * showing a game over screen.
+     */
     public void gameOver() {
+        Intent gameOver = new Intent(this, GameOverActivity.class);
+        startActivity(gameOver);
         this.finish();
     }
 
