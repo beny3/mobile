@@ -10,11 +10,11 @@ import java.util.regex.Pattern;
 
 public class ObjectLoader {
 
-    static Data3d load(AssetManager assetManager){
+    static Data3d load(AssetManager assetManager,String name){
         Pattern pattern;
         Matcher matcher;
         try {
-            InputStream fis = assetManager.open("3dobj");
+            InputStream fis = assetManager.open(name);
             ObjectInputStream is = new ObjectInputStream(fis);
             Data3d s = null;
             try {

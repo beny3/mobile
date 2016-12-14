@@ -58,8 +58,8 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
-    Data3d readData(){
-        return ObjectLoader.load(assetManager);
+    Data3d readData(String name){
+        return ObjectLoader.load(assetManager, name);
     }
 
     public void gameOver() {

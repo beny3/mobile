@@ -253,12 +253,14 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
         // Generation of the cylinder for the tunnel in the game.
         Cylinder cylinder = new Cylinder(16, 70);
         Block block = new Block();
-        Data3d playerData = parentActivity.readData();
+        Data3d playerData = parentActivity.readData("3dobj");
+        Data3d monsterData = parentActivity.readData("monstreobj");
         //Data3d dino = parentActivity.readData();
 
         // Creation of the buffers for the 3D models of the objects in the game.
         int indexBlock = createBuffers(block.vertices, block.uv, block.faces, R.drawable.red);
         int player = createBuffers(playerData.vertices, playerData.uvs, playerData.elements, R.drawable.tex_ship);
+        int monster = createBuffers(monsterData.vertices, monsterData.uvs, monsterData.elements, R.drawable.monstre);
 
         // Objects are added in the game.
         // First, the tunnel is created with a cylinder.
@@ -270,8 +272,8 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
         //addObject(30, -13f, 1f, indexDino );
         //addObject(180, -18f, 1f, indexBlock);
         //addObject(180, -30f, 1f, indexBlock);
-        //addObject(80, -40f, 1f, indexBlock);
-        int a = addObject(20, -10f, 1f, indexBlock);
+        addObject(80, -40f, 1f, monster);
+        int a = addObject(20, -10f, 1f, monster);
         float[] v= {0f, 10f, 0f};
         float[] p= {0f, -2f, 0f};
         objects[2].addObject(v, p, player);
@@ -491,10 +493,6 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
         Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
     }
 
-    public void mult(float[] m1, float[] m2){
-
-    }
-
 
     public void make(Object3D o,  int  depth){
         int i;
@@ -514,7 +512,7 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
 
         drawTriangles(o,depth);
 
-        if (o.z < 0 && o.z + 0.1*time>=0){
+        if (o.z < 0 && o.z + 0.1*time>=0  ){
             o.z= o.z0 - 0.1f*time;
             //compute the absolut opengl coordinate of the objet o when its z coord == 0
             // we store that position in the vector "coltest"
@@ -525,8 +523,6 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
             // if squared distance is less than 0.2 then colision
             // TODO instead of 0.2 we might want to have different sizes for different objects
             if (coltest[0]*coltest[0] + coltest[1]*coltest[1] + coltest[2]*coltest[2] < 0.2){
-
-                //System.out.println("BADABOUUM ! ");
 
                 parentActivity.running = false;
                 parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
