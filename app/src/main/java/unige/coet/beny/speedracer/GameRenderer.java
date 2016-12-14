@@ -1,6 +1,7 @@
 package unige.coet.beny.speedracer;
 
 import android.app.AlertDialog;
+import android.app.admin.SystemUpdatePolicy;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -26,7 +27,7 @@ import javax.microedition.khronos.opengles.GL10;
  * Created by aurelien_coet on 30.11.16.
  */
 
-public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener {
+public class GameRenderer  implements GLSurfaceView.Renderer, SensorEventListener {
 
     public SensorManager sensorManager;
 
@@ -34,7 +35,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
     private float time;
     private Context context;
 
-    private float[] mModelMatrix = new float[16];
+    private float[][] mModelMatrix = new float[10][16];
     private float[] mWorldMatrix = new float[16];
 
     // Stores the view matrix. This can be thought of as our camera. This matrix transforms world space to eye space;
@@ -54,9 +55,10 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
     private int[] faceSizes = new int[20];
 
     private float[][] matrices = new float[20][16];
+    private float[] coltest= new float[4];
 
-    private int objectPointer = 0;
-    private Object3D[] objects = new Object3D[20];
+   // private int objectPointer = 0;
+   // private Object3D[] objects = new Object3D[20];
     private int playerIndex;
 
     // Integers referencing buffers on the graphics card (in OpenGL).
@@ -64,7 +66,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
     private int mWorldMatrixHandle;
     private int mMVPMatrixHandle;
     private int mPositionHandle;
-    private int mColorHandle;
+    //private int mColorHandle;
     private int mUvHandle;
     private int mtimeHandle;
     private int mZposeHandle;
@@ -72,6 +74,10 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
 
     public float rotScreen;
     public float rotZero = 0;
+
+    public int objectPointer = 0;
+    public Object3D[] objects = new Object3D[20];
+
 
     public GameRenderer(Context context, GameActivity parentActivity, SensorManager sensorManager){
         this.context = context;
@@ -130,11 +136,14 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
      * @param r
      * @param index
      */
+
+
     public int addObject(float angle, float z, float r, int index){
         objects[objectPointer++] = new Object3D(angle, z, r, index);
         return objectPointer - 1;
 
     }
+
 
     /**
      * Loads a texture for an object.
@@ -183,34 +192,36 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
      * Draws the triangles of an object on the screen.
      * @param object
      */
-    private void drawTriangles(Object3D object)
+    private void drawTriangles(Object3D object, int depthMat)
     {
-        // Pass in the position information
-        //System.out.println(o.toString() + " " + vbo[o.index]);
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferObj[object.index]);
-        GLES20.glEnableVertexAttribArray(mPositionHandle);
-        GLES20.glVertexAttribPointer(mPositionHandle, 3, GLES20.GL_FLOAT, false, 0, 0);
 
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferObj[object.index]);
-        GLES20.glEnableVertexAttribArray(mColorHandle);
-        GLES20.glVertexAttribPointer(mColorHandle, 3, GLES20.GL_FLOAT, false, 0, 0);
+            // Pass in the position information
+            //System.out.println(o.toString() + " " + vbo[o.index]);
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferObj[object.index]);
+            GLES20.glEnableVertexAttribArray(mPositionHandle);
+            GLES20.glVertexAttribPointer(mPositionHandle, 3, GLES20.GL_FLOAT, false, 0, 0);
+            /*
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferObj[object.index]);
+            GLES20.glEnableVertexAttribArray(mColorHandle);
+            GLES20.glVertexAttribPointer(mColorHandle, 3, GLES20.GL_FLOAT, false, 0, 0);
+            */
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, uvBufferObj[object.index]);
+            GLES20.glEnableVertexAttribArray(mUvHandle);
+            GLES20.glVertexAttribPointer(mUvHandle, 2, GLES20.GL_FLOAT, false, 0, 0);
 
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, uvBufferObj[object.index]);
-        GLES20.glEnableVertexAttribArray(mUvHandle);
-        GLES20.glVertexAttribPointer(mUvHandle, 2, GLES20.GL_FLOAT, false, 0, 0);
+            GLES20.glUniformMatrix4fv(mModelMatrixHandle, 1, false, mModelMatrix[depthMat], 0);
+            GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mProjectionMatrix, 0);
+            GLES20.glUniformMatrix4fv(mWorldMatrixHandle, 1, false, mWorldMatrix, 0);
+            GLES20.glUniform1f(mtimeHandle, time);
+            GLES20.glUniform1f(mZposeHandle, object.z);
+            //TEXTURE
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureBufferObj[object.index]);
+            GLES20.glUniform1i(mTextureUniformHandle, 0);
 
-        GLES20.glUniformMatrix4fv(mModelMatrixHandle, 1, false,  mModelMatrix, 0);
-        GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mProjectionMatrix, 0);
-        GLES20.glUniformMatrix4fv(mWorldMatrixHandle, 1, false, mWorldMatrix, 0);
-        GLES20.glUniform1f(mtimeHandle, time);
-        GLES20.glUniform1f(mZposeHandle, object.z);
-        //TEXTURE
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureBufferObj[object.index]);
-        GLES20.glUniform1i(mTextureUniformHandle, 0);
+            GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, indexBufferObj[object.index]);
+            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES, faceSizes[object.index], GLES20.GL_UNSIGNED_SHORT, 0);
 
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, indexBufferObj[object.index]);
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, faceSizes[object.index], GLES20.GL_UNSIGNED_SHORT,  0);
     }
 
     @Override
@@ -251,12 +262,15 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
         // The object representing the player is then added.
         playerIndex = addObject(0, 3, 0.5f, player);
         // Finally, obstacles are added.
-        addObject(0, -10f, 1f, indexBlock);
+        //addObject(0, -10f, 1f, indexBlock);
         //addObject(30, -13f, 1f, indexDino );
-        addObject(180, -18f, 1f, indexBlock );
-        addObject(180, -30f, 1f, indexBlock );
-        addObject(80, -40f, 1f, indexBlock );
-        addObject(90, -50f, 1f, indexBlock);
+        //addObject(180, -18f, 1f, indexBlock);
+        //addObject(180, -30f, 1f, indexBlock);
+        //addObject(80, -40f, 1f, indexBlock);
+        int a = addObject(20, -10f, 1f, indexBlock);
+        float[] v= {0f, 10f, 0f};
+        float[] p= {0f, -2f, 0f};
+        objects[2].addObject(v, p, player);
 
         Matrix.setIdentityM(mWorldMatrix, 0);
         //Matrix.rotateM(mWorldMatrix, 0, 30f, 0.0f, 0.0f, 1.0f);
@@ -300,9 +314,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
                         +"uniform float time;\n"
                         +"uniform float Zpose;\n"
                         +"attribute vec3 a_Position;\n"     // Per-vertex position information we will pass in.
-                        +"attribute vec3 a_Color;\n"
                         +"attribute vec2 uv;\n"             // Per-vertex color information we will pass in.
-                        +"varying vec3 v_Color;\n"		    // This will be passed into the fragment shader.
                         +"varying vec2 v_uv;\n"
 
                         +"float f(float t, float z, float v) {\n "
@@ -319,7 +331,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
 
                         + "void main()\n"		            // The entry point for our vertex shader.
                         + "{ v_uv = uv;\n "
-                        + "   v_Color = a_Color;\n"
+                        //+ "   v_Color = a_Color;\n"
                         + "   float v=0.1;\n"
                         + "   vec3 add;\n"
                         + "   vec4 pos;\n"
@@ -334,7 +346,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
                         + "    v_uv[0]+= 0.5;"
                         +"       v_uv[1]+= time*v;\n"
                         + "      add= vec3(f(time, a_Position[2], v), 0, 0);\n"
-                        + "      pos = u_WorldMatrix*u_ModelMatrix* vec4(a_Position+ add ,1);\n"
+                        + "      pos = u_WorldMatrix*vec4(a_Position+ add ,1);\n"
                         + "   }\n"
                         // It will be interpolated across the triangle.
                         + "   gl_Position = u_MVPMatrix*pos ;\n"        // Multiply the vertex by the matrix to get the final point in
@@ -344,7 +356,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
                 "precision mediump float;\n"		            // Set the default precision to medium. We don't need as high of a
                         +"uniform sampler2D u_Texture;\n"
                         // precision in the fragment shader.
-                        + "varying vec3 v_Color;\n"
+                        //+ "varying vec3 v_Color;\n"
                         + "varying vec2 v_uv;\n"
                         // triangle per fragment.
                         + "void main()\n"		                // The entry point for our fragment shader.
@@ -420,7 +432,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
 
             // Bind attributes
             GLES20.glBindAttribLocation(programHandle, 0, "a_Position");
-            GLES20.glBindAttribLocation(programHandle, 1, "a_Color");
+            //GLES20.glBindAttribLocation(programHandle, 1, "a_Color");
 
             // Link the two shaders together into a program.
             GLES20.glLinkProgram(programHandle);
@@ -450,7 +462,7 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
         mtimeHandle = GLES20.glGetUniformLocation(programHandle, "time");
         mZposeHandle = GLES20.glGetUniformLocation(programHandle, "Zpose");
         mPositionHandle = GLES20.glGetAttribLocation(programHandle, "a_Position");
-        mColorHandle = GLES20.glGetAttribLocation(programHandle, "a_Color");
+        //mColorHandle = GLES20.glGetAttribLocation(programHandle, "a_Color");
         mUvHandle = GLES20.glGetAttribLocation(programHandle, "uv");
         mTextureUniformHandle = GLES20.glGetUniformLocation(programHandle, "u_Texture");
 
@@ -476,6 +488,57 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
         Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
     }
 
+    public void mult(float[] m1, float[] m2){
+
+    }
+
+
+    public void make(Object3D o,  int  depth){
+        int i;
+        o.sumV();
+        float[] m= mModelMatrix[depth];
+        for (i=0; i<16; i++){
+            mModelMatrix[depth][i] = mModelMatrix[depth-1][i];
+        }
+
+        Matrix.translateM(m, 0,  o.p[0], o.p[1], o.p[2]);
+
+        Matrix.rotateM(mModelMatrix[depth], 0, o.angle[0], 0.1f, 0.0f, 0.0f);
+        Matrix.rotateM(mModelMatrix[depth], 0, o.angle[1], 0.0f, 0.1f, 0.0f);
+        Matrix.rotateM(mModelMatrix[depth], 0, o.angle[2], 0.0f, 0.0f, 1.0f);
+
+
+
+        drawTriangles(o,depth);
+
+        if (o.z < 0 && o.z + 0.1*time>=0){
+            o.z= o.z0 - 0.1f*time;
+            //compute the absolut opengl coordinate of the objet o when its z coord == 0
+            // we store that position in the vector "coltest"
+            Matrix.multiplyMV(coltest,0,mWorldMatrix,0, mModelMatrix[depth], 12);
+            //we want the distance beetween the player and the object (their centers)
+            //becaus the player is at [0,1,0] this is = coltest - player_position
+            coltest[1]-=1;
+            // if squared distance is less than 0.2 then colision
+            // TODO instead of 0.2 we might want to have different sizes for different objects
+            if (coltest[0]*coltest[0] + coltest[1]*coltest[1] + coltest[2]*coltest[2] < 0.2){
+
+                //System.out.println("BADABOUUM ! ");
+
+                parentActivity.running = false;
+                parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+                parentActivity.gameOver();
+                return;
+            }
+        }
+
+        i=0;
+        while (o.objects[i]!=null) {
+            make(o.objects[i],  depth + 1);
+            i++;
+        }
+    }
+
     // This function is called every time a frame is being rendered. All objects in the objects array
     // are rendered. The rendering is done by the method drawTriangles().
     @Override
@@ -485,23 +548,21 @@ public class GameRenderer implements GLSurfaceView.Renderer, SensorEventListener
         //Matrix.setIdentityM(mWorldMatrix, 0);
         Matrix.rotateM(mWorldMatrix, 0, rotScreen/6.f, 0.0f, 0.0f, 1.0f);
         objects[playerIndex].theta = (rotScreen + objects[playerIndex].theta)/1.5f;
+        Matrix.setIdentityM(mModelMatrix[0], 0);
+        int i=0;
+        while(objects[i]!=null){
 
-        for (int i=0; i < objectPointer; i++){
-            Matrix.setIdentityM(mModelMatrix, 0);
-            Matrix.rotateM(mModelMatrix, 0, objects[i].theta, 0.0f, 0.0f, 1.0f);
-            Matrix.translateM(mModelMatrix, 0, 0.0f, objects[i].r, 0.0f);
 
-            if (objects[i].z < 0 && objects[i].z + 0.1*time>=0){
-                objects[i].z= objects[i].z0 - 0.1f*time;
-                if (mModelMatrix[4] - mWorldMatrix[1]< 0.2 && mModelMatrix[4] - mWorldMatrix[1]> -0.2  && mModelMatrix[0] - mWorldMatrix[0]< 0.2 && mModelMatrix[0] - mWorldMatrix[0]> -0.2 ) {
-                    parentActivity.running = false;
-                    parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-                    parentActivity.gameOver();
-                    return;
-                }
-            }
+            Matrix.setIdentityM(mModelMatrix[0], 0);
 
-            drawTriangles(objects[i]);
+            Matrix.rotateM(mModelMatrix[0], 0, objects[i].theta, 0.0f, 0.0f, 1.0f);
+            Matrix.translateM(mModelMatrix[0], 0, 0.0f, objects[i].r, 0.0f);
+            //System.out.println("   call make rec "+ i);
+            make(objects[i],  1);
+
+
+            //drawTriangles(objects[i],0);
+            i++;
         }
     }
 }
