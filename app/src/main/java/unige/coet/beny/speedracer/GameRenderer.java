@@ -58,6 +58,9 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
 
     private float[][] matrices = new float[20][16];
     private float[] coltest= new float[4];
+    private int[] projectil= new int[4];
+    private int projCount=0;
+    private float totalAngle;
 
    // private int objectPointer = 0;
    // private Object3D[] objects = new Object3D[20];
@@ -272,6 +275,8 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
         float[] v= {0f, 10f, 0f};
         float[] p= {0f, -2f, 0f};
         objects[2].addObject(v, p, player);
+        for( int i=0; i<4; i++)
+            projectil[i] = addObject(0, 0f, 1f, indexBlock);
 
         Matrix.setIdentityM(mWorldMatrix, 0);
         //Matrix.rotateM(mWorldMatrix, 0, 30f, 0.0f, 0.0f, 1.0f);
@@ -543,23 +548,29 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         time++;
-        //Matrix.setIdentityM(mWorldMatrix, 0);
+        if(time%20==0){
+            objects[projectil[projCount]].theta = -totalAngle;
+            objects[projectil[projCount]].z= -0.1f*time;
+            objects[projectil[projCount]].z0= -0.1f*time;
+            projCount=(projCount+1)%4;
+        }
+        int i=0;
+        for(i=0; i<4; i++)
+            objects[projectil[i]].z -= 0.3f;
+
+        totalAngle+=rotScreen/5.f;
+
         Matrix.rotateM(mWorldMatrix, 0, rotScreen/5.f, 0.0f, 0.0f, 1.0f);
         objects[playerIndex].theta = (rotScreen + objects[playerIndex].theta)/1.5f;
         Matrix.setIdentityM(mModelMatrix[0], 0);
-        int i=0;
+        i=0;
+
         while(objects[i]!=null){
-
-
             Matrix.setIdentityM(mModelMatrix[0], 0);
-
             Matrix.rotateM(mModelMatrix[0], 0, objects[i].theta, 0.0f, 0.0f, 1.0f);
             Matrix.translateM(mModelMatrix[0], 0, 0.0f, objects[i].r, 0.0f);
-            //System.out.println("   call make rec "+ i);
             make(objects[i],  1);
 
-
-            //drawTriangles(objects[i],0);
             i++;
         }
     }
