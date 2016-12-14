@@ -1,19 +1,14 @@
 package unige.coet.beny.speedracer;
 
-import android.app.AlertDialog;
-import android.app.admin.SystemUpdatePolicy;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.widget.Toast;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -29,12 +24,12 @@ import static java.lang.Math.abs;
  * Created by aurelien_coet on 30.11.16.
  */
 
-public class GameRenderer  implements GLSurfaceView.Renderer {
+public class GameRenderer implements GLSurfaceView.Renderer {
 
     public SensorManager sensorManager;
 
     private GameActivity parentActivity;
-    private float time;
+    public float time;
     private Context context;
 
     private float[][] mModelMatrix = new float[10][16];
@@ -147,7 +142,6 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
         return objectPointer - 1;
 
     }
-
 
     /**
      * Loads a texture for an object.
@@ -514,13 +508,13 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
 
         if (o.z < 0 && o.z + 0.1*time>=0  ){
             o.z= o.z0 - 0.1f*time;
-            //compute the absolut opengl coordinate of the objet o when its z coord == 0
-            // we store that position in the vector "coltest"
+            // We compute the absolute opengl coordinate of the object o when its z coord == 0.
+            // We store that position in the vector "coltest".
             Matrix.multiplyMV(coltest,0,mWorldMatrix,0, mModelMatrix[depth], 12);
             //we want the distance beetween the player and the object (their centers)
-            //becaus the player is at [0,1,0] this is = coltest - player_position
+            //because the player is at [0,1,0] this is = coltest - player_position
             coltest[1]-=1;
-            // if squared distance is less than 0.2 then colision
+            // if squared distance is less than 0.2 then collision
             // TODO instead of 0.2 we might want to have different sizes for different objects
             if (coltest[0]*coltest[0] + coltest[1]*coltest[1] + coltest[2]*coltest[2] < 0.2){
 
@@ -544,14 +538,13 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         time++;
-        if(time%20==0){
+        /*if(time%20==0){
             objects[projectil[projCount]].theta = -totalAngle;
             objects[projectil[projCount]].z= -0.1f*time;
             objects[projectil[projCount]].z0= -0.1f*time;
             projCount=(projCount+1)%4;
-        }
-        int i=0;
-        for(i=0; i<4; i++)
+        }*/
+        for(int i=0; i<4; i++)
             objects[projectil[i]].z -= 0.3f;
 
         totalAngle+=rotScreen/5.f;
@@ -559,8 +552,8 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
         Matrix.rotateM(mWorldMatrix, 0, rotScreen/5.f, 0.0f, 0.0f, 1.0f);
         objects[playerIndex].theta = (rotScreen + objects[playerIndex].theta)/1.5f;
         Matrix.setIdentityM(mModelMatrix[0], 0);
-        i=0;
 
+        int i=0;
         while(objects[i]!=null){
             Matrix.setIdentityM(mModelMatrix[0], 0);
             Matrix.rotateM(mModelMatrix[0], 0, objects[i].theta, 0.0f, 0.0f, 1.0f);
@@ -570,4 +563,15 @@ public class GameRenderer  implements GLSurfaceView.Renderer {
             i++;
         }
     }
+
+    /**
+     * Adds a projectile on screen in the game, in front of the ship of the player.
+     */
+    public void addProjectile(){
+        objects[projectil[projCount]].theta = -totalAngle;
+        objects[projectil[projCount]].z = -0.1f * time;
+        objects[projectil[projCount]].z0 = -0.1f * time;
+        projCount = (projCount + 1) % 4;
+    }
+
 }

@@ -11,6 +11,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.widget.Toast;
 
@@ -32,7 +33,6 @@ public class GameActivity extends AppCompatActivity {
 
         final Context gameContext = this;
         mOrientationEventListener = new OrientationEventListener(this, SensorManager.SENSOR_DELAY_GAME){
-
             @Override
             public void onOrientationChanged(int arg0) {
 
@@ -44,7 +44,17 @@ public class GameActivity extends AppCompatActivity {
                 }
             }};
 
-        this.mGLSurfaceView = new GLSurfaceView(this);
+        // The GLSurfaceView for the game. Overrides onTouchEvent() to react
+        // to touch events triggered by the player.
+        this.mGLSurfaceView = new GLSurfaceView(this){
+            @Override
+            public boolean onTouchEvent(MotionEvent e) {
+                //if (gameRenderer.time % 5 == 0)
+                gameRenderer.addProjectile();
+                return true;
+            }
+        };
+
         this.gameRenderer = new GameRenderer(this, this);
         this.mGLSurfaceView.setEGLContextClientVersion(2);
         this.mGLSurfaceView.setRenderer(gameRenderer);
