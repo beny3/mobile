@@ -16,11 +16,13 @@ public class GameOverActivity extends AppCompatActivity {
     public void newGame(View view){
         Intent newGame = new Intent(this, GameActivity.class);
         startActivity(newGame);
+        this.finish();
     }
 
     public void mainMenu(View view){
         Intent mainMenu = new Intent(this, MainMenu.class);
         startActivity(mainMenu);
+        this.finish();
     }
 
 }

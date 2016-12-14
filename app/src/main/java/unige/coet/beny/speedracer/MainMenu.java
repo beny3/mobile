@@ -34,6 +34,7 @@ public class MainMenu extends AppCompatActivity {
         if (supportsEs2){
             Intent intent = new Intent(this, GameActivity.class);
             startActivity(intent);
+            this.finish();
         }
         else {
             new AlertDialog.Builder(this)
