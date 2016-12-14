@@ -23,11 +23,13 @@ import java.nio.ShortBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import static java.lang.Math.abs;
+
 /**
  * Created by aurelien_coet on 30.11.16.
  */
 
-public class GameRenderer  implements GLSurfaceView.Renderer, SensorEventListener {
+public class GameRenderer  implements GLSurfaceView.Renderer {
 
     public SensorManager sensorManager;
 
@@ -72,17 +74,16 @@ public class GameRenderer  implements GLSurfaceView.Renderer, SensorEventListene
     private int mZposeHandle;
     private int mTextureUniformHandle;
 
-    public float rotScreen;
-    public float rotZero = 0;
+    public int rotScreen;
+    public int rotZero;
 
     public int objectPointer = 0;
     public Object3D[] objects = new Object3D[20];
 
 
-    public GameRenderer(Context context, GameActivity parentActivity, SensorManager sensorManager){
+    public GameRenderer(Context context, GameActivity parentActivity){
         this.context = context;
         this.parentActivity = parentActivity;
-        this.sensorManager = sensorManager;
         this.time = 0;
     }
 
@@ -224,15 +225,15 @@ public class GameRenderer  implements GLSurfaceView.Renderer, SensorEventListene
 
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        float[] values = event.values;
-        rotScreen = event.values[1] - rotZero;
-    }
+    public void onRotationChanged(int rotation) {
+        int rot = rotation - rotZero;
+        if (abs(rot) > 90){
+            this.rotScreen = 75*(rot/abs(rot));
+        }
+        else {
+            this.rotScreen = rot;
+        }
 
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        //EMPTY.
     }
 
     @Override
@@ -274,9 +275,6 @@ public class GameRenderer  implements GLSurfaceView.Renderer, SensorEventListene
 
         Matrix.setIdentityM(mWorldMatrix, 0);
         //Matrix.rotateM(mWorldMatrix, 0, 30f, 0.0f, 0.0f, 1.0f);
-
-        // Registration of the sensor to capture user input in order to move in the game.
-        sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_FASTEST);
 
         // Set the background clear color to black.
         GLES20.glClearColor(0.f, 0.f, 0.f, 1.f);
@@ -546,7 +544,7 @@ public class GameRenderer  implements GLSurfaceView.Renderer, SensorEventListene
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         time++;
         //Matrix.setIdentityM(mWorldMatrix, 0);
-        Matrix.rotateM(mWorldMatrix, 0, rotScreen/6.f, 0.0f, 0.0f, 1.0f);
+        Matrix.rotateM(mWorldMatrix, 0, rotScreen/5.f, 0.0f, 0.0f, 1.0f);
         objects[playerIndex].theta = (rotScreen + objects[playerIndex].theta)/1.5f;
         Matrix.setIdentityM(mModelMatrix[0], 0);
         int i=0;
