@@ -12,6 +12,7 @@ public class Object3D {
     public float z;
     public float z0;
     public int index;
+    public boolean isProjectil=false;
     public float[] p={0,0,0};
     public float[] angle={0,0,0};
     public float[] angularV = {0,0,0};
@@ -50,8 +51,13 @@ public class Object3D {
         for (i=0; i<3; i++){
             angle[i]+=angularV[i];
             p[i]+= V[i];
-
         }
+        /*
+        if (p[0]*p[0] + p[1]*p[1] > 1){
+            V[0]-=2*p[0]*V[0]*V[0];
+            V[1]-=2*p[1]*V[1]*V[1];
+        }
+        */
     }
 
 

@@ -1,6 +1,8 @@
 package unige.coet.beny.speedracer;
 
 import android.content.Context;
+import android.content.SyncAdapterType;
+import android.content.SyncStats;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.SensorManager;
@@ -54,6 +56,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     private float[][] matrices = new float[20][16];
     private float[] coltest= new float[4];
     private int[] projectil= new int[4];
+    public Projectil[] projectils = new Projectil[8];
     private int projCount=0;
     private float totalAngle;
 
@@ -188,37 +191,39 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     /**
      * Draws the triangles of an object on the screen.
-     * @param object
+     * @param index
+     * @param z
+     * @param depthMat
      */
-    private void drawTriangles(Object3D object, int depthMat)
+    private void drawTriangles(int index, float z, float[] m, int depthMat)
     {
 
             // Pass in the position information
             //System.out.println(o.toString() + " " + vbo[o.index]);
-            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferObj[object.index]);
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferObj[index]);
             GLES20.glEnableVertexAttribArray(mPositionHandle);
             GLES20.glVertexAttribPointer(mPositionHandle, 3, GLES20.GL_FLOAT, false, 0, 0);
             /*
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBufferObj[object.index]);
             GLES20.glEnableVertexAttribArray(mColorHandle);
-            GLES20.glVertexAttribPointer(mColorHandle, 3, GLES20.GL_FLOAT, false, 0, 0);
+            GLEv S20.glVertexAttribPointer(mColorHandle, 3, GLES20.GL_FLOAT, false, 0, 0);
             */
-            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, uvBufferObj[object.index]);
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, uvBufferObj[index]);
             GLES20.glEnableVertexAttribArray(mUvHandle);
             GLES20.glVertexAttribPointer(mUvHandle, 2, GLES20.GL_FLOAT, false, 0, 0);
 
-            GLES20.glUniformMatrix4fv(mModelMatrixHandle, 1, false, mModelMatrix[depthMat], 0);
+            GLES20.glUniformMatrix4fv(mModelMatrixHandle, 1, false, m, 0);
             GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mProjectionMatrix, 0);
             GLES20.glUniformMatrix4fv(mWorldMatrixHandle, 1, false, mWorldMatrix, 0);
             GLES20.glUniform1f(mtimeHandle, time);
-            GLES20.glUniform1f(mZposeHandle, object.z);
+            GLES20.glUniform1f(mZposeHandle, z);
             //TEXTURE
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureBufferObj[object.index]);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureBufferObj[index]);
             GLES20.glUniform1i(mTextureUniformHandle, 0);
 
-            GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, indexBufferObj[object.index]);
+            GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, indexBufferObj[index]);
             GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES, faceSizes[object.index], GLES20.GL_UNSIGNED_SHORT, 0);
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES, faceSizes[index], GLES20.GL_UNSIGNED_SHORT, 0);
 
     }
 
@@ -261,18 +266,26 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         addObject(0, 2, 0, createBuffers(cylinder.vertices, cylinder.uv, cylinder.faces, R.drawable.bake));
         // The object representing the player is then added.
         playerIndex = addObject(0, 3, 0.5f, player);
-        // Finally, obstacles are added.
-        //addObject(0, -10f, 1f, indexBlock);
-        //addObject(30, -13f, 1f, indexDino );
-        //addObject(180, -18f, 1f, indexBlock);
-        //addObject(180, -30f, 1f, indexBlock);
-        addObject(80, -40f, 1f, monster);
+
+        addObject(0, -40f, 1f, monster);
+        addObject(315, -40f, 1f, monster);
+        addObject(270, -40f, 1f, monster);
+        addObject(225, -40f, 1f, monster);
+        addObject(180, -40f, 1f, monster);
+        addObject(135, -40f, 1f, monster);
+        addObject(90, -40f, 1f, monster);
+        addObject(45, -40f, 1f, monster);
         int a = addObject(20, -10f, 1f, monster);
         float[] v= {0f, 10f, 0f};
         float[] p= {0f, -2f, 0f};
-        objects[2].addObject(v, p, player);
-        for( int i=0; i<4; i++)
-            projectil[i] = addObject(0, 0f, 1f, indexBlock);
+        objects[a].addObject(v, p, player);
+
+
+        for( int i=0; i<8; i++) {
+            projectils[i]=new Projectil(-100f, 1f, indexBlock);
+
+        }
+        projectils[7]=new Projectil(-100f, 1f, monster);
 
         Matrix.setIdentityM(mWorldMatrix, 0);
         //Matrix.rotateM(mWorldMatrix, 0, 30f, 0.0f, 0.0f, 1.0f);
@@ -473,7 +486,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         // Set the OpenGL viewport to the same size as the surface.
         GLES20.glViewport(0, 0, width, height);
-
         // Create a new perspective projection matrix. The height will stay the same
         // while the width will vary as per aspect ratio.
         final float ratio = (float) width / height;
@@ -487,7 +499,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
     }
 
-
     public void make(Object3D o,  int  depth){
         int i;
         o.sumV();
@@ -497,14 +508,36 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         }
 
         Matrix.translateM(m, 0,  o.p[0], o.p[1], o.p[2]);
-
         Matrix.rotateM(mModelMatrix[depth], 0, o.angle[0], 0.1f, 0.0f, 0.0f);
         Matrix.rotateM(mModelMatrix[depth], 0, o.angle[1], 0.0f, 0.1f, 0.0f);
         Matrix.rotateM(mModelMatrix[depth], 0, o.angle[2], 0.0f, 0.0f, 1.0f);
 
+        drawTriangles(o.index, o.z, mModelMatrix[depth] ,depth);
 
 
-        drawTriangles(o,depth);
+        for (i = 0; i < 8; i++) {
+
+            Projectil p = projectils[i];
+            float zo = o.z  + 0.1f*time;
+            float zp = p.z  + 0.1f*time;
+            if (zp < zo + 0.1) {
+                coltest[0] = mModelMatrix[depth][12]-p.m[12];
+                coltest[1] = mModelMatrix[depth][13]-p.m[13];
+                coltest[2] = mModelMatrix[depth][14]-p.m[14];
+                System.out.println("missile" + coltest[0] +" "+  coltest[1] +" " +  coltest[2] + "SUM " + coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] );
+                if (coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] < 0.2) {
+                    o.V[0] = 0.05f;
+                    o.V[1] = -0.05f;
+                    o.V[2] = -0.18f;
+
+                    o.angularV[0] = 2f;
+                    o.angularV[1] = 4f;
+                    o.angularV[2] = 3f;
+                }
+            }
+        }
+
+
 
         if (o.z < 0 && o.z + 0.1*time>=0  ){
             o.z= o.z0 - 0.1f*time;
@@ -517,11 +550,12 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             // if squared distance is less than 0.2 then collision
             // TODO instead of 0.2 we might want to have different sizes for different objects
             if (coltest[0]*coltest[0] + coltest[1]*coltest[1] + coltest[2]*coltest[2] < 0.2){
-
+                /*
                 parentActivity.running = false;
                 parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
                 parentActivity.gameOver();
                 return;
+                */
             }
         }
 
@@ -538,16 +572,13 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         time++;
-        /*if(time%20==0){
-            objects[projectil[projCount]].theta = -totalAngle;
-            objects[projectil[projCount]].z= -0.1f*time;
-            objects[projectil[projCount]].z0= -0.1f*time;
-            projCount=(projCount+1)%4;
-        }*/
-        for(int i=0; i<4; i++)
-            objects[projectil[i]].z -= 0.3f;
 
         totalAngle+=rotScreen/5.f;
+
+        for(int i=0; i<8; i++) {
+            projectils[i].z -= 0.3f;
+            drawTriangles(projectils[i].index, projectils[i].z , projectils[i].m , 0);
+        }
 
         Matrix.rotateM(mWorldMatrix, 0, rotScreen/5.f, 0.0f, 0.0f, 1.0f);
         objects[playerIndex].theta = (rotScreen + objects[playerIndex].theta)/1.5f;
@@ -568,10 +599,15 @@ public class GameRenderer implements GLSurfaceView.Renderer {
      * Adds a projectile on screen in the game, in front of the ship of the player.
      */
     public void addProjectile(){
-        objects[projectil[projCount]].theta = -totalAngle;
-        objects[projectil[projCount]].z = -0.1f * time;
-        objects[projectil[projCount]].z0 = -0.1f * time;
-        projCount = (projCount + 1) % 4;
+
+        projectils[projCount].z = -0.1f * time -1f;
+        projectils[projCount].z0 = -0.1f * time -1f;
+        float[] m =  projectils[projCount].m;
+        Matrix.setIdentityM(m, 0);
+        Matrix.rotateM(m, 0,  -totalAngle, 0.0f, 0.0f, 1.0f);
+        Matrix.translateM(m, 0, 0.0f, projectils[projCount].r, 0.0f);
+
+        projCount = (projCount + 1) % 8;
     }
 
 }
