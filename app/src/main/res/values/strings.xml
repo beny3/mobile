@@ -4,4 +4,9 @@
     <string name="high_score1">HighScore1</string>
     <string name="settings_file">settingsFile</string>
     <string name="sensitivity">sensitivity</string>
+    <string name="how_to">- The goal of this game is to survive as long as possible without entering
+    in collision with a obstacle.\n - You can destroy obstacles by shooting at them. To shoot an
+        obstacle, touch the screen.\n
+    - To move your spaceship laterally, tilt your phone on the sides.\n
+    - You can pause the game by laying your phone horizontally (as you would putting it on a table).</string>
 </resources>

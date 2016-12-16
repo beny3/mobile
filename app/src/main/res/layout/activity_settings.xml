@@ -52,7 +52,7 @@
                 <RadioButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Medium"
+                    android:text="Med"
                     android:onClick="setSensitivityMed"/>
 
                 <RadioButton android:id="@+id/radio_ninjas"

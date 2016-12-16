@@ -33,8 +33,11 @@
         <activity
             android:name=".HighScoresActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".SettingsActivity"
-            android:screenOrientation="landscape"/>
+        <activity
+            android:name=".SettingsActivity"
+            android:screenOrientation="landscape" />
+        <activity android:name=".HowToActivity"
+            android:screenOrientation="landscape" />
     </application>
 
 </manifest>
