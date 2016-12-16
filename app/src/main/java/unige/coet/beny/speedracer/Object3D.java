@@ -66,6 +66,7 @@ public class Object3D {
             p[i] = 0;
             V[i]  = 0;
             angularV[i] = 0;
+            angle[i]= 0;
         }
     }
 
