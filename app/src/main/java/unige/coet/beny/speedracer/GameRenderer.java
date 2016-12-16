@@ -79,14 +79,17 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     public int rotScreen;
     public int rotZero;
 
+    private float sensitivity;
+
     public int objectPointer = 0;
     public Object3D[] objects = new Object3D[20];
 
 
-    public GameRenderer(Context context, GameActivity parentActivity){
+    public GameRenderer(Context context, GameActivity parentActivity, float sensitivity){
         this.context = context;
         this.parentActivity = parentActivity;
         this.time = 0;
+        this.sensitivity = sensitivity;
     }
 
     /**
@@ -288,7 +291,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             projectils[i]=new Projectil(-100f, 1f, indexBlock);
 
         }
-        projectils[7]=new Projectil(-100f, 1f, monster);
 
         Matrix.setIdentityM(mWorldMatrix, 0);
         //Matrix.rotateM(mWorldMatrix, 0, 30f, 0.0f, 0.0f, 1.0f);
@@ -592,14 +594,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         time++;
 
-        totalAngle+=rotScreen/5.f;
+        totalAngle+=rotScreen/sensitivity;
 
         for(int i=0; i<8; i++) {
             projectils[i].z -= 0.3f;
             drawTriangles(projectils[i].index, projectils[i].z , projectils[i].m , 0);
         }
 
-        Matrix.rotateM(mWorldMatrix, 0, rotScreen/5.f, 0.0f, 0.0f, 1.0f);
+        Matrix.rotateM(mWorldMatrix, 0, rotScreen/sensitivity, 0.0f, 0.0f, 1.0f);
         objects[playerIndex].theta = (rotScreen + objects[playerIndex].theta)/1.5f;
         Matrix.setIdentityM(mModelMatrix[0], 0);
 

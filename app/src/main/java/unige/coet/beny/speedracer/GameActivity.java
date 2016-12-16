@@ -59,13 +59,18 @@ public class GameActivity extends AppCompatActivity {
             }
         };
 
-        this.gameRenderer = new GameRenderer(this, this);
+        // The sensitivity of the controls selected by the player in the settings is retrieved and
+        // set as the sensitivity for the rotation in the game renderer.
+        SharedPreferences settings = this.getSharedPreferences(getString(R.string.settings_file), MODE_PRIVATE);
+        float sensitivity = settings.getFloat(getString(R.string.sensitivity), 5.f);
+
+        this.gameRenderer = new GameRenderer(this, this, sensitivity);
         this.mGLSurfaceView.setEGLContextClientVersion(2);
         this.mGLSurfaceView.setRenderer(gameRenderer);
         this.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         setContentView(this.mGLSurfaceView);
 
-        // A textview indicating his score to the player is added to the view in the GameActivity.
+        // A TextView indicating his score to the player is added to the view in the GameActivity.
         scoreView = new TextView(this);
         scoreView.setText("Score : 0");
         addContentView(scoreView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));

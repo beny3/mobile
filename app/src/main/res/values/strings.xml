@@ -2,4 +2,6 @@
     <string name="app_name">SpeedRacer</string>
     <string name="scores_file">scoresFile</string>
     <string name="high_score1">HighScore1</string>
+    <string name="settings_file">settingsFile</string>
+    <string name="sensitivity">sensitivity</string>
 </resources>

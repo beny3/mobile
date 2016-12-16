@@ -6,15 +6,15 @@ package unige.coet.beny.speedracer;
 
 public class Block {
 
-    public  float [] vertices = { -0.2f,0f,-0.1f,
-            0.2f, 0f,-0.1f,
-            0.2f, 1f,-0.1f,
-            -0.2f, 1f,-0.1f,
+    public  float [] vertices = { -0.1f,0f,-0.2f,
+            0.1f, 0f,-0.2f,
+            0.1f, 0.2f,-0.2f,
+            -0.1f, 0.2f,-0.2f,
 
-            -0.2f,0f, 0.1f,
-            0.2f, 0f, 0.1f,
-            0.2f, 1f, 0.1f,
-            -0.2f, 1f, 0.1f,
+            -0.1f,0f, 0.2f,
+            0.1f, 0f, 0.2f,
+            0.1f, 0.2f, 0.2f,
+            -0.1f, 0.2f, 0.2f,
     };
 
     public float [] uv= { 0f, 0f,
