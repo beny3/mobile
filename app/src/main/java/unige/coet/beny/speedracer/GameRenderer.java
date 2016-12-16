@@ -21,6 +21,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.sqrt;
 
 /**
  * Created by aurelien_coet on 30.11.16.
@@ -266,15 +267,17 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         addObject(0, 2, 0, createBuffers(cylinder.vertices, cylinder.uv, cylinder.faces, R.drawable.bake));
         // The object representing the player is then added.
         playerIndex = addObject(0, 3, 0.5f, player);
-
+        /*
         addObject(0, -40f, 1f, monster);
         addObject(315, -40f, 1f, monster);
         addObject(270, -40f, 1f, monster);
         addObject(225, -40f, 1f, monster);
         addObject(180, -40f, 1f, monster);
-        addObject(135, -40f, 1f, monster);
+        */
+        addObject(135, -50f, 1f, monster);
         addObject(90, -40f, 1f, monster);
-        addObject(45, -40f, 1f, monster);
+        addObject(45, -20f, 1f, monster);
+
         int a = addObject(20, -10f, 1f, monster);
         float[] v= {0f, 10f, 0f};
         float[] p= {0f, -2f, 0f};
@@ -334,7 +337,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         +"  //float zz = (z+ t*v + 1.);\n"
                         +"  //float r = sin(t*0.01)*4. + 12.;\n"
                         +"  //return sqrt(r*r-zz*zz)-r;\n"
-                        +"   return sin((z + t*v)/4.)*2. - sin(t*v/4.)*2. - z*cos(t*v/4.)*0.5;\n"
+                        +"    return sin((z + t*v)/4.)*2. - sin(t*v/4.)*2. - z*cos(t*v/4.)*0.5;\n"
                         +"}\n"
 
                         +" float g() {\n "
@@ -508,39 +511,53 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         }
 
         Matrix.translateM(m, 0,  o.p[0], o.p[1], o.p[2]);
-        Matrix.rotateM(mModelMatrix[depth], 0, o.angle[0], 0.1f, 0.0f, 0.0f);
-        Matrix.rotateM(mModelMatrix[depth], 0, o.angle[1], 0.0f, 0.1f, 0.0f);
-        Matrix.rotateM(mModelMatrix[depth], 0, o.angle[2], 0.0f, 0.0f, 1.0f);
+        Matrix.rotateM(m, 0, o.angle[0], 0.1f, 0.0f, 0.0f);
+        Matrix.rotateM(m, 0, o.angle[1], 0.0f, 0.1f, 0.0f);
+        Matrix.rotateM(m, 0, o.angle[2], 0.0f, 0.0f, 1.0f);
+        //System.out.println("col"+(m[12]*m[12]+m[13]*m[13]) + " time"+ time);
+
+        if (m[12]*m[12] +  (m[13])*(m[13]) > 4  ){//&&  m[12]*m[12] + m[13]*m[13] < 4
+
+            //float dot= (m[12]*o.V[0] + m[13]*o.V[1])/2;
+            //o.V[0]=(o.V[0]-m[12]);
+            //o.V[1]=(o.V[1]-m[13]);
+            o.V[0]=-m[12]*0.1f;
+            o.V[1]=-m[13]*0.1f;
+           /// System.out.println(o.V[0] +" " +  o.V[1]  + " time"+ time);
+
+        }
+
 
         drawTriangles(o.index, o.z, mModelMatrix[depth] ,depth);
+        if (o.z < 0) {
+            for (i = 0; i < 8; i++) {
 
+                Projectil p = projectils[i];
+                float zo = o.z + 0.1f * time;
+                float zp = p.z + 0.1f * time;
+                if (zp < zo + 0.1 && !p.explode ){
+                    coltest[0] = m[12] - p.m[12];
+                    coltest[1] = m[13] - p.m[13];
+                    coltest[2] = m[14] - p.m[14];
+                    //System.out.println("missile" + coltest[0] +" "+  coltest[1] +" " +  coltest[2] + "SUM " + coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] );
+                    if (coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] < 0.2 ) {
+                        p.explode  =true;
+                        o.V[0] = 0.05f;
+                        o.V[1] = -0.04f*(time%3);
+                        o.vz = -0.18f;
 
-        for (i = 0; i < 8; i++) {
-
-            Projectil p = projectils[i];
-            float zo = o.z  + 0.1f*time;
-            float zp = p.z  + 0.1f*time;
-            if (zp < zo + 0.1) {
-                coltest[0] = mModelMatrix[depth][12]-p.m[12];
-                coltest[1] = mModelMatrix[depth][13]-p.m[13];
-                coltest[2] = mModelMatrix[depth][14]-p.m[14];
-                System.out.println("missile" + coltest[0] +" "+  coltest[1] +" " +  coltest[2] + "SUM " + coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] );
-                if (coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] < 0.2) {
-                    o.V[0] = 0.05f;
-                    o.V[1] = -0.05f;
-                    o.V[2] = -0.18f;
-
-                    o.angularV[0] = 2f;
-                    o.angularV[1] = 4f;
-                    o.angularV[2] = 3f;
+                        o.angularV[0] = 2f;
+                        o.angularV[1] = 4f;
+                        o.angularV[2] = 3f;
+                    }
                 }
             }
         }
 
 
-
         if (o.z < 0 && o.z + 0.1*time>=0  ){
             o.z= o.z0 - 0.1f*time;
+            o.reset();
             // We compute the absolute opengl coordinate of the object o when its z coord == 0.
             // We store that position in the vector "coltest".
             Matrix.multiplyMV(coltest,0,mWorldMatrix,0, mModelMatrix[depth], 12);
@@ -549,13 +566,13 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             coltest[1]-=1;
             // if squared distance is less than 0.2 then collision
             // TODO instead of 0.2 we might want to have different sizes for different objects
-            if (coltest[0]*coltest[0] + coltest[1]*coltest[1] + coltest[2]*coltest[2] < 0.2){
-                /*
+            if (coltest[0]*coltest[0] + coltest[1]*coltest[1] + coltest[2]*coltest[2] < 0.3){
+
                 parentActivity.running = false;
                 parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
                 parentActivity.gameOver();
                 return;
-                */
+
             }
         }
 
@@ -599,7 +616,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
      * Adds a projectile on screen in the game, in front of the ship of the player.
      */
     public void addProjectile(){
-
+        projectils[projCount].explode  =false;
         projectils[projCount].z = -0.1f * time -1f;
         projectils[projCount].z0 = -0.1f * time -1f;
         float[] m =  projectils[projCount].m;

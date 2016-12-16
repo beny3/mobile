@@ -11,6 +11,7 @@ public class Object3D {
     public float r;
     public float z;
     public float z0;
+    public float vz=0;
     public int index;
     public boolean isProjectil=false;
     public float[] p={0,0,0};
@@ -48,18 +49,25 @@ public class Object3D {
 
     public void sumV(){
         int i;
+        z+=vz;
+        vz*=0.99;
         for (i=0; i<3; i++){
             angle[i]+=angularV[i];
             p[i]+= V[i];
         }
-        /*
-        if (p[0]*p[0] + p[1]*p[1] > 1){
-            V[0]-=2*p[0]*V[0]*V[0];
-            V[1]-=2*p[1]*V[1]*V[1];
-        }
-        */
+
     }
 
+    public void reset(){
+        int i;
+        z+=vz;
+        vz*=0.99;
+        for (i=0; i<3; i++){
+            p[i] = 0;
+            V[i]  = 0;
+            angularV[i] = 0;
+        }
+    }
 
     @Override
     public String toString() {

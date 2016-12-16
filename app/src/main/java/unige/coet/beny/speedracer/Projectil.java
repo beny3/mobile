@@ -7,6 +7,7 @@ import android.opengl.Matrix;
  */
 public class Projectil {
 
+    public boolean explode=false;
     public float theta;
     public float r;
     public float z;
