@@ -544,18 +544,16 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             // We compute the absolute opengl coordinate of the object o when its z coord == 0.
             // We store that position in the vector "coltest".
             Matrix.multiplyMV(coltest,0,mWorldMatrix,0, mModelMatrix[depth], 12);
-            //we want the distance beetween the player and the object (their centers)
-            //because the player is at [0,1,0] this is = coltest - player_position
+            // We want the distance beetween the player and the objects (their centers),
+            // because the player is at [0,1,0] this is = coltest - player_position
             coltest[1]-=1;
             // if squared distance is less than 0.2 then collision
             // TODO instead of 0.2 we might want to have different sizes for different objects
             if (coltest[0]*coltest[0] + coltest[1]*coltest[1] + coltest[2]*coltest[2] < 0.2){
-                /*
                 parentActivity.running = false;
                 parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
                 parentActivity.gameOver();
                 return;
-                */
             }
         }
 
