@@ -2,6 +2,9 @@ package unige.coet.beny.speedracer;
 
 import android.opengl.Matrix;
 
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 /**
  * Created by aurelien_coet on 30.11.16.
  */
@@ -15,6 +18,8 @@ public class Object3D {
     public int index;
     public boolean isAmmo=false;
     public float[] p={0,0,0};
+    public float[] p0={0,0,0};
+    public float[] angle0={0,0,0};
     public float[] angle={0,0,0};
     public float[] angularV = {0,0,0};
     public float[] V = new float[3];
@@ -41,6 +46,12 @@ public class Object3D {
 
     Object3D (float theta, float z, float r, int index) {
         this.theta = theta;
+        this.angle[2]= theta;
+        this.p[0]=(float)cos((theta+90)*2*3.14159/360)*r;
+        this.p[1]=(float)sin((theta+90)*2*3.14159/360)*r;
+        this.p0[0]=p[0];
+        this.p0[1]=p[1];
+        this.angle0[2]=  angle[2];
         this.z = z;
         this.z0 = z;
         this.r = r;
@@ -60,14 +71,14 @@ public class Object3D {
 
     public void reset(){
         int i;
-        z+=vz;
-        vz*=0.99;
+
         for (i=0; i<3; i++){
-            p[i] = 0;
+            p[i] = p0[i];
             V[i]  = 0;
             angularV[i] = 0;
-            angle[i]= 0;
+            angle[i]= angle0[i];
         }
+
     }
 
     @Override

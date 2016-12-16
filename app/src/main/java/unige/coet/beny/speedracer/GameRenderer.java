@@ -271,18 +271,20 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         addObject(0, 2, 0, createBuffers(cylinder.vertices, cylinder.uv, cylinder.faces, R.drawable.bake));
         // The object representing the player is then added.
         playerIndex = addObject(0, 3, 0.5f, player);
-        /*
-        addObject(0, -40f, 1f, monster);
-        addObject(315, -40f, 1f, monster);
-        addObject(270, -40f, 1f, monster);
-        addObject(225, -40f, 1f, monster);
-        addObject(180, -40f, 1f, monster);
-        */
-        addObject(135, -50f, 1f, monster);
-        addObject(90, -40f, 1f, monster);
-        addObject(45, -20f, 1f, monster);
+
+
+
+        addObject(180, -41f, 1f, monster);
+        addObject(225, -38f, 1f, monster);
+        addObject(135, -34f, 1f, monster);
+        addObject(90, -22f, 1f, monster);
+        addObject(45, -15f, 1f, monster);
 
         int a = addObject(20, -10f, 1f, monster);
+        addObject(10, -8f, 1f, monster);
+        addObject(20, -4f, 1f, monster);
+        addObject(270, -13f, 1f, monster);
+
         float[] v= {0f, 10f, 0f};
         float[] p= {0f, -2f, 0f};
         objects[a].addObject(v, p, player);
@@ -522,11 +524,11 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
         if (m[12]*m[12] +  (m[13])*(m[13]) > 4  ){//&&  m[12]*m[12] + m[13]*m[13] < 4
 
-            //float dot= (m[12]*o.V[0] + m[13]*o.V[1])/2;
-            //o.V[0]=(o.V[0]-m[12]);
-            //o.V[1]=(o.V[1]-m[13]);
-            o.V[0]=-m[12]*0.1f;
-            o.V[1]=-m[13]*0.1f;
+            float dot= (m[12]*o.V[0] + m[13]*o.V[1])/2;
+            o.V[0]=(o.V[0]-dot*m[12]);
+            o.V[1]=(o.V[1]-dot*m[13]);
+            //o.V[0]=-m[12]*0.1f;
+            //o.V[1]=-m[13]*0.1f;
            /// System.out.println(o.V[0] +" " +  o.V[1]  + " time"+ time);
 
         }
@@ -562,7 +564,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
 
         if (o.z < 0 && o.z + 0.1*time>=0  ){
-            o.z= o.z0 - 0.1f*time;
+            o.z=o.z - 50;
             o.reset();
             // We compute the absolute opengl coordinate of the object o when its z coord == 0.
             // We store that position in the vector "coltest".
@@ -610,14 +612,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         }
 
         Matrix.rotateM(mWorldMatrix, 0, rotScreen/sensitivity, 0.0f, 0.0f, 1.0f);
-        objects[playerIndex].theta = (rotScreen + objects[playerIndex].theta)/1.5f;
-        Matrix.setIdentityM(mModelMatrix[0], 0);
+        objects[playerIndex].angle[2] = (rotScreen + objects[playerIndex].theta)/1.5f;
+        //Matrix.setIdentityM(mModelMatrix[0], 0);
 
         int i=0;
         while(objects[i]!=null){
             Matrix.setIdentityM(mModelMatrix[0], 0);
-            Matrix.rotateM(mModelMatrix[0], 0, objects[i].theta, 0.0f, 0.0f, 1.0f);
-            Matrix.translateM(mModelMatrix[0], 0, 0.0f, objects[i].r, 0.0f);
+            //Matrix.rotateM(mModelMatrix[0], 0, objects[i].theta, 0.0f, 0.0f, 1.0f);
+            //Matrix.translateM(mModelMatrix[0], 0, 0.0f, objects[i].r, 0.0f);
             make(objects[i],  1);
 
             i++;
