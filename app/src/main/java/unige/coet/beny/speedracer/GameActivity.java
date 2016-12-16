@@ -38,7 +38,8 @@ public class GameActivity extends AppCompatActivity {
             public void onOrientationChanged(int arg0) {
 
                 if (arg0 == ORIENTATION_UNKNOWN){
-                    Toast.makeText(gameContext, "Can't detect orientation -> pause", Toast.LENGTH_SHORT).show();
+                    Intent pause = new Intent(gameContext, PauseActivity.class);
+                    startActivity(pause);
                 }
                 else {
                     gameRenderer.onRotationChanged(arg0);
