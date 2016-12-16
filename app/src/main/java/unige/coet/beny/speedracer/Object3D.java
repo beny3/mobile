@@ -13,7 +13,7 @@ public class Object3D {
     public float z0;
     public float vz=0;
     public int index;
-    public boolean isProjectil=false;
+    public boolean isAmmo=false;
     public float[] p={0,0,0};
     public float[] angle={0,0,0};
     public float[] angularV = {0,0,0};

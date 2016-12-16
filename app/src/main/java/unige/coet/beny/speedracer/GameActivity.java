@@ -9,6 +9,7 @@ import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Layout;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ public class GameActivity extends AppCompatActivity {
 
     public GLSurfaceView mGLSurfaceView;
     private TextView scoreView;
+    private TextView ammoView;
     private GameRenderer gameRenderer;
     public boolean running = false;
     private AssetManager assetManager;
@@ -53,7 +55,11 @@ public class GameActivity extends AppCompatActivity {
 
                 switch (e.getAction()) {
                     case MotionEvent.ACTION_DOWN:
-                        gameRenderer.addProjectile();
+                        int ammoLeft = gameRenderer.addProjectile();
+
+                        if (ammoLeft>=0){
+                            updateAmmoOnScreen(ammoLeft);
+                        }
                 }
                 return true;
             }
@@ -75,8 +81,14 @@ public class GameActivity extends AppCompatActivity {
         scoreView.setText("Score : 0");
         addContentView(scoreView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
+        // A TextView indicating to the player the ammo he has left is added to the view in the GameActivity.
+        ammoView = new TextView(this);
+        ammoView.setText("Ammo : 5");
+        ammoView.setGravity(Gravity.RIGHT);
+        addContentView(ammoView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
         if (!running) {
-            gameRenderer.rotZero = 270;
+            gameRenderer.rotZero = 270; // Initial orientation is always at 270.
             mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
             running=true;
         }
@@ -103,7 +115,7 @@ public class GameActivity extends AppCompatActivity {
             editor.commit();
         }
 
-        // Teh game over activity is launched.
+        // The game over activity is launched.
         Intent gameOver = new Intent(this, GameOverActivity.class);
         gameOver.putExtra(EXTRA_MESSAGE, ""+(int)score);
         startActivity(gameOver);
@@ -119,6 +131,15 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void run() {
                 scoreView.setText("Score : "+score);
+            }
+        });
+    }
+
+    public void updateAmmoOnScreen(final int ammo){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ammoView.setText("Ammo : "+ammo);
             }
         });
     }

@@ -81,6 +81,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     private float sensitivity;
 
+    private int ammo = 5;
+
     public int objectPointer = 0;
     public Object3D[] objects = new Object3D[20];
 
@@ -141,9 +143,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
      * @param z
      * @param r
      * @param index
+     * @return the index of the object.
      */
-
-
     public int addObject(float angle, float z, float r, int index){
         objects[objectPointer++] = new Object3D(angle, z, r, index);
         return objectPointer - 1;
@@ -285,6 +286,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         float[] v= {0f, 10f, 0f};
         float[] p= {0f, -2f, 0f};
         objects[a].addObject(v, p, player);
+        objects[a].isAmmo = true;
 
 
         for( int i=0; i<8; i++) {
@@ -552,7 +554,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         o.angularV[1] = 4f;
                         o.angularV[2] = 3f;
 
-                        projectils[i].z = -100f;
+                        projectils[i].z = -100.f;
                     }
                 }
             }
@@ -572,9 +574,15 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             // TODO instead of 0.2 we might want to have different sizes for different objects
             if (coltest[0]*coltest[0] + coltest[1]*coltest[1] + coltest[2]*coltest[2] < 0.3){
 
-                parentActivity.running = false;
-                parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-                parentActivity.gameOver(time);
+                if (o.isAmmo==false){
+                    parentActivity.running = false;
+                    parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+                    parentActivity.gameOver(time);
+                }
+                else {
+                    ammo += 5;
+                    this.parentActivity.updateAmmoOnScreen(ammo);
+                }
                 return;
 
             }
@@ -622,16 +630,22 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     /**
      * Adds a projectile on screen in the game, in front of the ship of the player.
      */
-    public void addProjectile(){
-        projectils[projCount].explode  =false;
-        projectils[projCount].z = -0.1f * time -1f;
-        projectils[projCount].z0 = -0.1f * time -1f;
-        float[] m =  projectils[projCount].m;
-        Matrix.setIdentityM(m, 0);
-        Matrix.rotateM(m, 0,  -totalAngle, 0.0f, 0.0f, 1.0f);
-        Matrix.translateM(m, 0, 0.0f, projectils[projCount].r, 0.0f);
+    public int addProjectile(){
+        if (ammo > 0){
+            projectils[projCount].explode  =false;
+            projectils[projCount].z = -0.1f * time -1f;
+            projectils[projCount].z0 = -0.1f * time -1f;
+            float[] m =  projectils[projCount].m;
+            Matrix.setIdentityM(m, 0);
+            Matrix.rotateM(m, 0,  -totalAngle, 0.0f, 0.0f, 1.0f);
+            Matrix.translateM(m, 0, 0.0f, projectils[projCount].r, 0.0f);
 
-        projCount = (projCount + 1) % 8;
+            projCount = (projCount + 1) % 8;
+            ammo -= 1;
+
+            return ammo;
+        }
+        return 0;
     }
 
 }
