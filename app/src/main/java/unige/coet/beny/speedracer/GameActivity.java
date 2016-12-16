@@ -1,26 +1,22 @@
 package unige.coet.beny.speedracer;
 
-import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ConfigurationInfo;
 import android.content.res.AssetManager;
 import android.hardware.SensorManager;
 import android.opengl.GLSurfaceView;
-import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Layout;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
-import android.widget.Toast;
-
-import static android.content.Context.SENSOR_SERVICE;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 public class GameActivity extends AppCompatActivity {
 
     public GLSurfaceView mGLSurfaceView;
+    private TextView scoreView;
     private GameRenderer gameRenderer;
     public boolean running = false;
     private AssetManager assetManager;
@@ -51,8 +47,11 @@ public class GameActivity extends AppCompatActivity {
         this.mGLSurfaceView = new GLSurfaceView(this){
             @Override
             public boolean onTouchEvent(MotionEvent e) {
-                //if (gameRenderer.time % 5 == 0)
-                gameRenderer.addProjectile();
+
+                switch (e.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        gameRenderer.addProjectile();
+                }
                 return true;
             }
         };
@@ -62,6 +61,11 @@ public class GameActivity extends AppCompatActivity {
         this.mGLSurfaceView.setRenderer(gameRenderer);
         this.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         setContentView(this.mGLSurfaceView);
+
+        // A textview indicating his score to the player is added to the view in the GameActivity.
+        scoreView = new TextView(this);
+        scoreView.setText("Score : 0");
+        addContentView(scoreView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
         if (!running) {
             gameRenderer.rotZero = 270;
@@ -85,6 +89,19 @@ public class GameActivity extends AppCompatActivity {
         this.finish();
     }
 
+    /**
+     * Updates the score of the player on the screen during the game.
+     * @param score the score of the player.
+     */
+    public void updateScoreOnScreen(final float score){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                scoreView.setText("Score : "+score);
+            }
+        });
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -96,5 +113,4 @@ public class GameActivity extends AppCompatActivity {
         super.onPause();
         mOrientationEventListener.disable();
     }
-
 }

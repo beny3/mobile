@@ -20,5 +20,6 @@ public class PauseActivity extends AppCompatActivity {
     public void mainMenu(View view){
         Intent mainMenu = new Intent(this, MainMenu.class);
         startActivity(mainMenu);
+        this.finish();
     }
 }

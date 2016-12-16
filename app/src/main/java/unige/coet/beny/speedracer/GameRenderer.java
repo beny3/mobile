@@ -541,7 +541,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                     coltest[2] = m[14] - p.m[14];
                     //System.out.println("missile" + coltest[0] +" "+  coltest[1] +" " +  coltest[2] + "SUM " + coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] );
                     if (coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] < 0.2 ) {
-                        p.explode  =true;
+                        p.explode = true;
                         o.V[0] = 0.05f;
                         o.V[1] = -0.04f*(time%3);
                         o.vz = -0.18f;
@@ -549,6 +549,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         o.angularV[0] = 2f;
                         o.angularV[1] = 4f;
                         o.angularV[2] = 3f;
+
+                        projectils[i].z = -100f;
                     }
                 }
             }
@@ -610,6 +612,9 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
             i++;
         }
+
+        if (time%5==0)
+            this.parentActivity.updateScoreOnScreen(time);
     }
 
     /**
