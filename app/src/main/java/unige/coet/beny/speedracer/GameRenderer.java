@@ -572,7 +572,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
                 parentActivity.running = false;
                 parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-                parentActivity.gameOver();
+                parentActivity.gameOver(time);
                 return;
 
             }

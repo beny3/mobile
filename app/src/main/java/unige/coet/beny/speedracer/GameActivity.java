@@ -2,6 +2,7 @@ package unige.coet.beny.speedracer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.hardware.SensorManager;
 import android.opengl.GLSurfaceView;
@@ -22,6 +23,8 @@ public class GameActivity extends AppCompatActivity {
     private AssetManager assetManager;
 
     OrientationEventListener mOrientationEventListener;
+
+    public final static String EXTRA_MESSAGE = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,10 +84,23 @@ public class GameActivity extends AppCompatActivity {
     /**
      * This method is called when the player enters in a collision with an
      * object in the game. It stops the current game and launches an activity
-     * showing a game over screen.
+     * showing a game over screen. Before doing so, it saves the player's score if
+     * it is better than his current highest score.
      */
-    public void gameOver() {
+    public void gameOver(float score) {
+        // We retrieve the best score of the player.
+        SharedPreferences scoresFile = this.getSharedPreferences(getString(R.string.scores_file), MODE_PRIVATE);
+        int highScore = scoresFile.getInt(getString(R.string.high_score1), 0);
+        // if the current score of the player is better than his best one, the best one is replaced.
+        if (score > highScore){
+            SharedPreferences.Editor editor = scoresFile.edit();
+            editor.putInt(getString(R.string.high_score1), (int) score);
+            editor.commit();
+        }
+
+        // Teh game over activity is launched.
         Intent gameOver = new Intent(this, GameOverActivity.class);
+        gameOver.putExtra(EXTRA_MESSAGE, ""+(int)score);
         startActivity(gameOver);
         this.finish();
     }

@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SpeedRacer</string>
-    <string name="start_button">New game</string>
+    <string name="scores_file">scoresFile</string>
+    <string name="high_score1">HighScore1</string>
 </resources>

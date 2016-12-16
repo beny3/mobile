@@ -27,7 +27,10 @@
         <activity
             android:name=".GameOverActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".PauseActivity"
+        <activity
+            android:name=".PauseActivity"
+            android:screenOrientation="landscape" />
+        <activity android:name=".HighScoresActivity"
             android:screenOrientation="landscape" />
     </application>
 
