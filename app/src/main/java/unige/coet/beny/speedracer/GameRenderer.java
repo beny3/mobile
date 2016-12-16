@@ -529,7 +529,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
 
         drawTriangles(o.index, o.z, mModelMatrix[depth] ,depth);
-        if (o.z < 0) {
+        if (o.z < 0 && depth==1) {
             for (i = 0; i < 8; i++) {
 
                 Projectil p = projectils[i];
