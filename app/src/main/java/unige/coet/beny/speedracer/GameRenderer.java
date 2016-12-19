@@ -83,7 +83,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
     private float sensitivity;
 
-    private int ammo = 5;
+    private int ammo = 50;
 
     public int objectPointer = 0;
     public Object3D[] objects = new Object3D[20];
@@ -280,8 +280,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         //addObject(-20, -33f, 1.2f, monster);
         //addObject(200, -28f, 1.2f, monster);
         //addObject(0, -24f, 1.2f, monster);
-        for (int i=0; i<12; i++) {
-            int a = addObject(40*i, -3*i, 1.2f, monster);
+        for (int i=0; i<10; i++) {
+            int a = addObject(10*i*i, -5*i, 1.2f, monster);
             objects[a].addObject(pied, 0.4f);
             objects[a].addObject(pied, -0.4f);
         }
@@ -571,7 +571,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         o.angularV[1] = 4f;
                         o.angularV[2] = 3f;
 
-                        projectils[i].z = -100.f;
+                        //projectils[i].z = -100.f;
                     }
                 }
             }

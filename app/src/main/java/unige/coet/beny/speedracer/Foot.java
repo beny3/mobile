@@ -25,6 +25,7 @@ public class Foot extends Object3D {
     @Override
     public void sumV(){
         z+=vz;
+        vz*=0.99;
         time+=0.3;
         p[2] = (float)cos(time + shift)/2;
         angle[0] = (float)cos(time + shift);
@@ -38,5 +39,6 @@ public class Foot extends Object3D {
     @Override
     public void reset(){
         z=z - 50;
+        vz = 0;
     }
 }

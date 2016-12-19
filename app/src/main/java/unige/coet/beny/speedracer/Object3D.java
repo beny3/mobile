@@ -66,7 +66,6 @@ public class Object3D {
     public void sumV(){
         int i;
         z+=vz;
-
         vz*=0.99;
         if (vtheta!=0 && vz >= 0 ){
             theta+=vtheta;
@@ -86,12 +85,14 @@ public class Object3D {
         int i;
         vtheta=0;
         z=z - 50;
+        vz = 0;
         for (i=0; i<3; i++){
             p[i] = p0[i];
             V[i]  = 0;
             angularV[i] = 0;
             angle[i]= angle0[i];
         }
+
 
     }
 
