@@ -21,6 +21,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.lang.Math.sqrt;
 
 /**
@@ -259,12 +261,14 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         Block block = new Block();
         Data3d playerData = parentActivity.readData("3dobj");
         Data3d monsterData = parentActivity.readData("monstreobj");
+        Data3d piedData = parentActivity.readData("piedobj");
         //Data3d dino = parentActivity.readData();
 
         // Creation of the buffers for the 3D models of the objects in the game.
         int indexBlock = createBuffers(block.vertices, block.uv, block.faces, R.drawable.red);
         int player = createBuffers(playerData.vertices, playerData.uvs, playerData.elements, R.drawable.tex_ship);
         int monster = createBuffers(monsterData.vertices, monsterData.uvs, monsterData.elements, R.drawable.monstre);
+        int pied = createBuffers(piedData.vertices, piedData.uvs, piedData.elements, R.drawable.pied);
 
         // Objects are added in the game.
         // First, the tunnel is created with a cylinder.
@@ -272,23 +276,26 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         // The object representing the player is then added.
         playerIndex = addObject(0, 3, 0.5f, player);
 
+        //addObject(240, -36f, 1.2f, monster);
+        //addObject(-20, -33f, 1.2f, monster);
+        //addObject(200, -28f, 1.2f, monster);
+        //addObject(0, -24f, 1.2f, monster);
+        for (int i=0; i<12; i++) {
+            int a = addObject(40*i, -3*i, 1.2f, monster);
+            objects[a].addObject(pied, 0.4f);
+            objects[a].addObject(pied, -0.4f);
+        }
+        int b = addObject(90, -16f, 1.2f, player);
+        objects[b].isAmmo = true;
+        //addObject(180, -12f, 1.2f, monster);
+        //addObject(-100, -8f, 1.2f, monster);
+        //addObject(0, -4f, 1.2f, monster);
 
-
-        addObject(180, -41f, 1f, monster);
-        addObject(225, -38f, 1f, monster);
-        addObject(135, -34f, 1f, monster);
-        addObject(90, -22f, 1f, monster);
-        addObject(45, -15f, 1f, monster);
-
-        int a = addObject(20, -10f, 1f, monster);
-        addObject(10, -8f, 1f, monster);
-        addObject(20, -4f, 1f, monster);
-        addObject(270, -13f, 1f, monster);
 
         float[] v= {0f, 10f, 0f};
         float[] p= {0f, -2f, 0f};
-        objects[a].addObject(v, p, player);
-        objects[a].isAmmo = true;
+        //objects[a].addObject(v, p, player);
+        //objects[a].isAmmo = true;
 
 
         for( int i=0; i<8; i++) {
@@ -509,33 +516,40 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     }
 
     public void make(Object3D o,  int  depth){
+        System.out.println("DEPTH " + depth);
         int i;
         o.sumV();
         float[] m= mModelMatrix[depth];
         for (i=0; i<16; i++){
-            mModelMatrix[depth][i] = mModelMatrix[depth-1][i];
+            m[i] = mModelMatrix[depth-1][i];
         }
 
         Matrix.translateM(m, 0,  o.p[0], o.p[1], o.p[2]);
         Matrix.rotateM(m, 0, o.angle[0], 0.1f, 0.0f, 0.0f);
         Matrix.rotateM(m, 0, o.angle[1], 0.0f, 0.1f, 0.0f);
         Matrix.rotateM(m, 0, o.angle[2], 0.0f, 0.0f, 1.0f);
-        //System.out.println("col"+(m[12]*m[12]+m[13]*m[13]) + " time"+ time);
 
-        if (m[12]*m[12] +  (m[13])*(m[13]) > 4  ){//&&  m[12]*m[12] + m[13]*m[13] < 4
+        drawTriangles(o.index, o.z, m ,depth);
+        if (o.z < 0 && depth==1 && !o.isAmmo) {
 
-            float dot= (m[12]*o.V[0] + m[13]*o.V[1])/2;
-            o.V[0]=(o.V[0]-dot*m[12]);
-            o.V[1]=(o.V[1]-dot*m[13]);
-            //o.V[0]=-m[12]*0.1f;
-            //o.V[1]=-m[13]*0.1f;
-           /// System.out.println(o.V[0] +" " +  o.V[1]  + " time"+ time);
+            if (m[12]*m[12] +  (m[13])*(m[13]) > 4  ){
+                float dot= (m[12]*o.V[0] + m[13]*o.V[1])/2.1f;
+                o.V[0]=(o.V[0]-dot*m[12])*0.99f;
+                o.V[1]=(o.V[1]-dot*m[13])*0.99f;
 
-        }
+            }
+
+            float d = (float)max(2,( o.z + 0.1*time)*( o.z + 0.1*time));
+            o.vtheta +=0.05f*(-totalAngle-o.theta)/d;
+
+            if (o.vtheta > 6){
+                o.vtheta = 6;
+            }
+            if (o.vtheta < -6){
+                o.vtheta = -6;
+            }
 
 
-        drawTriangles(o.index, o.z, mModelMatrix[depth] ,depth);
-        if (o.z < 0 && depth==1) {
             for (i = 0; i < 8; i++) {
 
                 Projectil p = projectils[i];
@@ -548,10 +562,11 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                     //System.out.println("missile" + coltest[0] +" "+  coltest[1] +" " +  coltest[2] + "SUM " + coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] );
                     if (coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] < 0.2 ) {
                         p.explode = true;
-                        o.V[0] = 0.05f;
-                        o.V[1] = -0.03f*(time%3);
+                        o.V[0] = 0.07f;
+                        o.V[1] = -0.05f*(time%3);
                         o.vz = -0.18f;
-
+                        o.objects[0].vz=o.vz;
+                        o.objects[1].vz=o.vz;
                         o.angularV[0] = 2f;
                         o.angularV[1] = 4f;
                         o.angularV[2] = 3f;
@@ -564,7 +579,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
 
         if (o.z < 0 && o.z + 0.1*time>=0  ){
-            o.z=o.z - 50;
             o.reset();
             // We compute the absolute opengl coordinate of the object o when its z coord == 0.
             // We store that position in the vector "coltest".
@@ -577,9 +591,11 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             if (coltest[0]*coltest[0] + coltest[1]*coltest[1] + coltest[2]*coltest[2] < 0.3){
 
                 if (o.isAmmo==false){
+
                     parentActivity.running = false;
                     parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
                     parentActivity.gameOver(time);
+
                 }
                 else {
                     ammo += 5;
@@ -612,7 +628,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         }
 
         Matrix.rotateM(mWorldMatrix, 0, rotScreen/sensitivity, 0.0f, 0.0f, 1.0f);
-        objects[playerIndex].angle[2] = (rotScreen + objects[playerIndex].theta)/1.5f;
+        objects[playerIndex].angle[2] = (rotScreen + objects[playerIndex].theta);
         //Matrix.setIdentityM(mModelMatrix[0], 0);
 
         int i=0;

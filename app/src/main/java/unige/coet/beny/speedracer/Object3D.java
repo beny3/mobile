@@ -11,6 +11,7 @@ import static java.lang.Math.sin;
 public class Object3D {
 
     public float theta;
+    public float vtheta=0;
     public float r;
     public float z;
     public float z0;
@@ -27,9 +28,12 @@ public class Object3D {
     public int objectPointer = 0;
     public Object3D[] objects = new Object3D[20];
 
-    public int addObject(float[] V, float[] p, int index){
-        objects[objectPointer++] = new Object3D(V, p, z0,  index);
+    public int addObject(int index, float x){
+        objects[objectPointer++] = new Foot(index,x, z0);
         return objectPointer - 1;
+
+    }
+    Object3D(){
 
     }
 
@@ -51,6 +55,7 @@ public class Object3D {
         this.p[1]=(float)sin((theta+90)*2*3.14159/360)*r;
         this.p0[0]=p[0];
         this.p0[1]=p[1];
+
         this.angle0[2]=  angle[2];
         this.z = z;
         this.z0 = z;
@@ -61,7 +66,15 @@ public class Object3D {
     public void sumV(){
         int i;
         z+=vz;
+
         vz*=0.99;
+        if (vtheta!=0 && vz >= 0 ){
+            theta+=vtheta;
+            this.angle[2]=theta;
+            this.p[0]=(float)cos((theta+90 + 0)*2*3.14159/360)*r;
+            this.p[1]=(float)sin((theta+90)*2*3.14159/360)*r;
+        }
+
         for (i=0; i<3; i++){
             angle[i]+=angularV[i];
             p[i]+= V[i];
@@ -71,7 +84,8 @@ public class Object3D {
 
     public void reset(){
         int i;
-
+        vtheta=0;
+        z=z - 50;
         for (i=0; i<3; i++){
             p[i] = p0[i];
             V[i]  = 0;
