@@ -28,7 +28,7 @@ public class Foot extends Object3D {
        // vz*=0.99;
         time+=0.3;
         p[2] = (float)cos(time + shift)*acc/10;
-        angle[0] = (float)cos(time + shift)*acc/10;
+        angle[0] = (float)sin(time + shift)*acc*9;
         /*
         for (int i=0; i<3; i++){
             angle[i]+=angularV[i];

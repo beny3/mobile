@@ -565,6 +565,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         o.V[0] = 0.07f;
                         o.V[1] = -0.05f*(time%3);
                         o.vz = -0.18f;
+                        o.acc = 0;
                         //o.objects[0].vz=o.vz;
                         //o.objects[1].vz=o.vz;
                         o.angularV[0] = 2f;
