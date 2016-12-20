@@ -147,8 +147,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
      * @param index
      * @return the index of the object.
      */
-    public int addObject(float angle, float z, float r, int index){
-        objects[objectPointer++] = new Object3D(angle, z, r, index);
+    public int addObject(float angle, float z, float r, int index, float acc){
+        objects[objectPointer++] = new Object3D(angle, z, r, index, acc);
         return objectPointer - 1;
 
     }
@@ -272,20 +272,20 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
         // Objects are added in the game.
         // First, the tunnel is created with a cylinder.
-        addObject(0, 2, 0, createBuffers(cylinder.vertices, cylinder.uv, cylinder.faces, R.drawable.bake));
+        addObject(0, 2, 0, createBuffers(cylinder.vertices, cylinder.uv, cylinder.faces, R.drawable.bake), 0);
         // The object representing the player is then added.
-        playerIndex = addObject(0, 3, 0.5f, player);
+        playerIndex = addObject(0, 3, 0.3f, player, 0);
 
         //addObject(240, -36f, 1.2f, monster);
         //addObject(-20, -33f, 1.2f, monster);
         //addObject(200, -28f, 1.2f, monster);
         //addObject(0, -24f, 1.2f, monster);
         for (int i=0; i<10; i++) {
-            int a = addObject(10*i*i, -5*i, 1.2f, monster);
+            int a = addObject(10*i*i, -5*i, 1.2f, monster,i*0.005f);
             objects[a].addObject(pied, 0.4f);
             objects[a].addObject(pied, -0.4f);
         }
-        int b = addObject(90, -16f, 1.2f, player);
+        int b = addObject(90, -16f, 1.2f, player,0);
         objects[b].isAmmo = true;
         //addObject(180, -12f, 1.2f, monster);
         //addObject(-100, -8f, 1.2f, monster);
@@ -509,7 +509,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         final float right = ratio;
         final float bottom = 1.0f;
         final float top = -1.0f;
-        final float near = 0.5f;
+        final float near = 0.43f;
         final float far = 15.0f;
 
         Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
@@ -540,7 +540,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             }
 
             float d = (float)max(2,( o.z + 0.1*time)*( o.z + 0.1*time));
-            o.vtheta +=0.05f*(-totalAngle-o.theta)/d;
+            o.vtheta +=o.acc*(-totalAngle-o.theta)/d;
 
             if (o.vtheta > 6){
                 o.vtheta = 6;
@@ -565,8 +565,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         o.V[0] = 0.07f;
                         o.V[1] = -0.05f*(time%3);
                         o.vz = -0.18f;
-                        o.objects[0].vz=o.vz;
-                        o.objects[1].vz=o.vz;
+                        //o.objects[0].vz=o.vz;
+                        //o.objects[1].vz=o.vz;
                         o.angularV[0] = 2f;
                         o.angularV[1] = 4f;
                         o.angularV[2] = 3f;
@@ -578,7 +578,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         }
 
 
-        if (o.z < 0 && o.z + 0.1*time>=0  ){
+        if (o.z < 0 && o.z + 0.1*time>=-1 ){
             o.reset();
             // We compute the absolute opengl coordinate of the object o when its z coord == 0.
             // We store that position in the vector "coltest".
@@ -595,6 +595,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                     parentActivity.running = false;
                     parentActivity.mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
                     parentActivity.gameOver(time);
+
 
                 }
                 else {
@@ -652,7 +653,6 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         if (ammo > 0){
             projectils[projCount].explode  =false;
             projectils[projCount].z = -0.1f * time -1f;
-            projectils[projCount].z0 = -0.1f * time -1f;
             float[] m =  projectils[projCount].m;
             Matrix.setIdentityM(m, 0);
             Matrix.rotateM(m, 0,  -totalAngle, 0.0f, 0.0f, 1.0f);

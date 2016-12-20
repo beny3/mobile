@@ -14,7 +14,7 @@ public class Object3D {
     public float vtheta=0;
     public float r;
     public float z;
-    public float z0;
+    public float acc;
     public float vz=0;
     public int index;
     public boolean isAmmo=false;
@@ -29,7 +29,7 @@ public class Object3D {
     public Object3D[] objects = new Object3D[20];
 
     public int addObject(int index, float x){
-        objects[objectPointer++] = new Foot(index,x, z0);
+        objects[objectPointer++] = new Foot(index, x, z, acc);
         return objectPointer - 1;
 
     }
@@ -40,7 +40,6 @@ public class Object3D {
     Object3D (float[] V, float[] p, float z, int index) {
         this.theta = 0;
         this.z =  z;
-        this.z0 = z;
         this.p = p;
         this.angularV = V;
         this.index = index;
@@ -48,17 +47,16 @@ public class Object3D {
 
 
 
-    Object3D (float theta, float z, float r, int index) {
+    Object3D (float theta, float z, float r, int index, float acc) {
         this.theta = theta;
         this.angle[2]= theta;
-        this.p[0]=(float)cos((theta+90)*2*3.14159/360)*r;
-        this.p[1]=(float)sin((theta+90)*2*3.14159/360)*r;
+        this.acc = acc;
+        this.p[0]=(float)cos((theta+90)*2*3.14159/360)*r/2;
+        this.p[1]=(float)sin((theta+90)*2*3.14159/360)*r/2;
         this.p0[0]=p[0];
         this.p0[1]=p[1];
-
         this.angle0[2]=  angle[2];
         this.z = z;
-        this.z0 = z;
         this.r = r;
         this.index = index;
     }
@@ -78,7 +76,10 @@ public class Object3D {
             angle[i]+=angularV[i];
             p[i]+= V[i];
         }
-
+        for(i=0; i< objectPointer; i++){
+            objects[i].z=z;
+            objects[i].acc = vtheta;
+        }
     }
 
     public void reset(){

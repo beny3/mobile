@@ -12,9 +12,9 @@ public class Foot extends Object3D {
     float time=0;
     float shift=0;
 
-    Foot(int ind, float x, float z0){
-        this.z0 = z0;
-        z = z0;
+    Foot(int ind, float x, float z0, float acc){
+        this.acc = acc;
+        this.z = z0;
         p[1]=0.5f;
         p[0]=x;
         if (x <0){
@@ -24,11 +24,11 @@ public class Foot extends Object3D {
     }
     @Override
     public void sumV(){
-        z+=vz;
-        vz*=0.99;
+       // z+=vz;
+       // vz*=0.99;
         time+=0.3;
-        p[2] = (float)cos(time + shift)/2;
-        angle[0] = (float)cos(time + shift);
+        p[2] = (float)cos(time + shift)*acc/10;
+        angle[0] = (float)cos(time + shift)*acc/10;
         /*
         for (int i=0; i<3; i++){
             angle[i]+=angularV[i];
