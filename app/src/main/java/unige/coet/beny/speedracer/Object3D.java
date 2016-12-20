@@ -84,7 +84,7 @@ public class Object3D {
 
     public void reset(){
         int i;
-        acc = 0.005f*z%10;
+        acc = -0.005f*(z%8);
         vtheta=0;
         z=z - 50;
         vz = 0;

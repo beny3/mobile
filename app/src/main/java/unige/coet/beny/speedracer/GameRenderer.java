@@ -281,7 +281,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         //addObject(200, -28f, 1.2f, monster);
         //addObject(0, -24f, 1.2f, monster);
         for (int i=0; i<10; i++) {
-            int a = addObject(10*i*i, -5*i, 1.2f, monster,i*0.005f);
+            int a = addObject(10*i*i, -5*i, 1.2f, monster,i*0.003f);
             objects[a].addObject(pied, 0.4f);
             objects[a].addObject(pied, -0.4f);
         }
@@ -540,7 +540,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
             }
 
             float d = (float)max(2,( o.z + 0.1*time)*( o.z + 0.1*time));
-            o.vtheta +=o.acc*(-totalAngle-o.theta)/d;
+            o.vtheta =(o.vtheta  + o.acc*(-totalAngle-o.theta)/d);
 
             if (o.vtheta > 6){
                 o.vtheta = 6;
@@ -622,7 +622,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         time++;
 
-        totalAngle+=rotScreen/sensitivity;
+        totalAngle+=(rotScreen/sensitivity)%360;
 
         for(int i=0; i<8; i++) {
             projectils[i].z -= 0.3f;
