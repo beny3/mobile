@@ -280,8 +280,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         //addObject(-20, -33f, 1.2f, monster);
         //addObject(200, -28f, 1.2f, monster);
         //addObject(0, -24f, 1.2f, monster);
-        for (int i=0; i<10; i++) {
-            int a = addObject(10*i*i, -5*i, 1.2f, monster,i*0.003f);
+        for (int i=1; i<7; i++) {
+            int a = addObject(10*i*i, -6*i - 2, 1.2f, monster,i*0.004f);
             objects[a].addObject(pied, 0.4f);
             objects[a].addObject(pied, -0.4f);
         }
