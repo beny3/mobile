@@ -12,6 +12,7 @@ public class Object3D {
 
     public float theta;
     public float vtheta=0;
+    public float vthetaInit=0;
     public float r;
     public float z;
     public float acc;
@@ -47,9 +48,11 @@ public class Object3D {
 
 
 
-    Object3D (float theta, float z, float r, int index, float acc) {
+    Object3D (float theta, float z, float r, int index, float acc, float vtheta) {
         this.theta = theta;
         this.angle[2]= theta;
+        this.vtheta = vtheta;
+        this.vthetaInit = vtheta;
         this.acc = acc;
         this.p[0]=(float)cos((theta+90)*2*3.14159/360)*r/2;
         this.p[1]=(float)sin((theta+90)*2*3.14159/360)*r/2;
@@ -57,6 +60,7 @@ public class Object3D {
         this.p0[1]=p[1];
         this.angle0[2]=  angle[2];
         this.z = z;
+        //this.p[2]=z;
         this.r = r;
         this.index = index;
     }
@@ -84,8 +88,8 @@ public class Object3D {
 
     public void reset(){
         int i;
-        acc = -0.005f*(z%8);
-        vtheta=0;
+        //acc = -0.005f*(z%10);
+        vtheta=vthetaInit;
         z=z - 50;
         vz = 0;
         for (i=0; i<3; i++){

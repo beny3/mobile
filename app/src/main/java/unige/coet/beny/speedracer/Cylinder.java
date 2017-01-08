@@ -51,12 +51,12 @@ public class Cylinder {
 
         }
 
-        System.out.println(uv.length);
+        //System.out.println(uv.length);
         for ( int j=0; j < nRow+1; j++) {
             int k=0;
             for (int i = 0; i < (n + 1)*2; i += 2) {
                 uv[j*(n+1)*2 + i] = (float)k/n;
-                uv[j*(n+1)*2 + i + 1] = (float)j;
+                uv[j*(n+1)*2 + i + 1] = (float)j/2;
 
                 k++;
             }

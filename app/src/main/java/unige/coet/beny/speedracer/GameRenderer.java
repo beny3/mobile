@@ -82,6 +82,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     public int rotZero;
 
     private float sensitivity;
+    private float speed = 0.12f;
 
     private int ammo = 50;
 
@@ -147,8 +148,8 @@ public class GameRenderer implements GLSurfaceView.Renderer {
      * @param index
      * @return the index of the object.
      */
-    public int addObject(float angle, float z, float r, int index, float acc){
-        objects[objectPointer++] = new Object3D(angle, z, r, index, acc);
+    public int addObject(float angle, float z, float r, int index, float acc, float v){
+        objects[objectPointer++] = new Object3D(angle, z, r, index, acc, v);
         return objectPointer - 1;
 
     }
@@ -262,6 +263,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         Data3d playerData = parentActivity.readData("3dobj");
         Data3d monsterData = parentActivity.readData("monstreobj");
         Data3d piedData = parentActivity.readData("piedobj");
+        Data3d tuyeauData = parentActivity.readData("tuyeauobj");
         //Data3d dino = parentActivity.readData();
 
         // Creation of the buffers for the 3D models of the objects in the game.
@@ -269,34 +271,31 @@ public class GameRenderer implements GLSurfaceView.Renderer {
         int player = createBuffers(playerData.vertices, playerData.uvs, playerData.elements, R.drawable.tex_ship);
         int monster = createBuffers(monsterData.vertices, monsterData.uvs, monsterData.elements, R.drawable.monstre);
         int pied = createBuffers(piedData.vertices, piedData.uvs, piedData.elements, R.drawable.pied);
+        int tuyeau = createBuffers(tuyeauData.vertices, tuyeauData.uvs, tuyeauData.elements, R.drawable.tuyeau);
 
         // Objects are added in the game.
         // First, the tunnel is created with a cylinder.
-        addObject(0, 2, 0, createBuffers(cylinder.vertices, cylinder.uv, cylinder.faces, R.drawable.bake), 0);
+        addObject(0, 2, 0, createBuffers(cylinder.vertices, cylinder.uv, cylinder.faces, R.drawable.bake), 0, 0);
         // The object representing the player is then added.
-        playerIndex = addObject(0, 3, 0.3f, player, 0);
+        playerIndex = addObject(0, 3, 0.3f, player, 0, 0);
 
-        //addObject(240, -36f, 1.2f, monster);
-        //addObject(-20, -33f, 1.2f, monster);
-        //addObject(200, -28f, 1.2f, monster);
-        //addObject(0, -24f, 1.2f, monster);
         for (int i=1; i<7; i++) {
-            int a = addObject(10*i*i, -6*i - 2, 1.2f, monster,i*0.004f);
+            int a = addObject(10*i*i, -6*i - 20, 1.2f,monster ,0.05f, -5 +5*(i%3));
             objects[a].addObject(pied, 0.4f);
             objects[a].addObject(pied, -0.4f);
         }
-        int b = addObject(90, -16f, 1.2f, player,0);
+        addObject(0, -12, 1.2f, tuyeau,0,0);
+        addObject(90, -14, 1.2f, tuyeau,0,0);
+        addObject(-90, -16, 1.2f, tuyeau,0,0);
+
+        addObject(60, -10, 1.2f, tuyeau,0,0);
+        addObject(150, -10, 1.2f, tuyeau,0,0);
+        addObject(240, -10, 1.2f, tuyeau,0,0);
+
+        int b = addObject(90, -16f, 1.2f, player,0,0);
         objects[b].isAmmo = true;
-        //addObject(180, -12f, 1.2f, monster);
-        //addObject(-100, -8f, 1.2f, monster);
-        //addObject(0, -4f, 1.2f, monster);
-
-
         float[] v= {0f, 10f, 0f};
         float[] p= {0f, -2f, 0f};
-        //objects[a].addObject(v, p, player);
-        //objects[a].isAmmo = true;
-
 
         for( int i=0; i<8; i++) {
             projectils[i]=new Projectil(-100f, 1f, indexBlock);
@@ -360,7 +359,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         + "void main()\n"		            // The entry point for our vertex shader.
                         + "{ v_uv = uv;\n "
                         //+ "   v_Color = a_Color;\n"
-                        + "   float v=0.1;\n"
+                        + "   float v="+speed+";\n"
                         + "   vec3 add;\n"
                         + "   vec4 pos;\n"
                         + "   if  (Zpose < 1.){\n"		    // Pass the color through to the fragment shader.
@@ -372,7 +371,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                         + "      pos = u_ModelMatrix*vec4(a_Position ,1)  + vec4(add, 0); \n"
                         + "   }else{\n"
                         + "    v_uv[0]+= 0.5;"
-                        +"       v_uv[1]+= time*v;\n"
+                        +"       v_uv[1]+= time*v/2.;\n"
                         + "      add= vec3(f(time, a_Position[2], v), 0, 0);\n"
                         + "      pos = u_WorldMatrix*vec4(a_Position+ add ,1);\n"
                         + "   }\n"
@@ -539,7 +538,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
 
             }
 
-            float d = (float)max(2,( o.z + 0.1*time)*( o.z + 0.1*time));
+            float d = (float)max(2,( o.z + speed*time)*( o.z + speed*time));
             o.vtheta =(o.vtheta  + o.acc*(-totalAngle-o.theta)/d);
 
             if (o.vtheta > 6){
@@ -549,37 +548,38 @@ public class GameRenderer implements GLSurfaceView.Renderer {
                 o.vtheta = -6;
             }
 
+            if ( o.acc > 0) {
+                for (i = 0; i < 8; i++) {
 
-            for (i = 0; i < 8; i++) {
+                    Projectil p = projectils[i];
+                    float zo = o.z + speed * time;
+                    float zp = p.z + speed * time;
+                    if (zp < zo + 0.1 && !p.explode) {
+                        coltest[0] = m[12] - p.m[12];
+                        coltest[1] = m[13] - p.m[13];
+                        coltest[2] = m[14] - p.m[14];
+                        //System.out.println("missile" + coltest[0] +" "+  coltest[1] +" " +  coltest[2] + "SUM " + coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] );
+                        if (coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] < 0.2) {
+                            p.explode = true;
+                            o.V[0] = 0.07f;
+                            o.V[1] = -0.05f * (time % 3);
+                            o.vz = -0.18f;
+                            o.acc = 0;
+                            //o.objects[0].vz=o.vz;
+                            //o.objects[1].vz=o.vz;
+                            o.angularV[0] = 2f;
+                            o.angularV[1] = 4f;
+                            o.angularV[2] = 3f;
 
-                Projectil p = projectils[i];
-                float zo = o.z + 0.1f * time;
-                float zp = p.z + 0.1f * time;
-                if (zp < zo + 0.1 && !p.explode ){
-                    coltest[0] = m[12] - p.m[12];
-                    coltest[1] = m[13] - p.m[13];
-                    coltest[2] = m[14] - p.m[14];
-                    //System.out.println("missile" + coltest[0] +" "+  coltest[1] +" " +  coltest[2] + "SUM " + coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] );
-                    if (coltest[0] * coltest[0] + coltest[1] * coltest[1] + coltest[2] * coltest[2] < 0.2 ) {
-                        p.explode = true;
-                        o.V[0] = 0.07f;
-                        o.V[1] = -0.05f*(time%3);
-                        o.vz = -0.18f;
-                        o.acc = 0;
-                        //o.objects[0].vz=o.vz;
-                        //o.objects[1].vz=o.vz;
-                        o.angularV[0] = 2f;
-                        o.angularV[1] = 4f;
-                        o.angularV[2] = 3f;
-
-                        //projectils[i].z = -100.f;
+                            //projectils[i].z = -100.f;
+                        }
                     }
                 }
             }
         }
 
 
-        if (o.z < 0 && o.z + 0.1*time>=-1 ){
+        if (o.z < 0 && o.z + speed*time>=-1 ){
             o.reset();
             // We compute the absolute opengl coordinate of the object o when its z coord == 0.
             // We store that position in the vector "coltest".
@@ -653,7 +653,7 @@ public class GameRenderer implements GLSurfaceView.Renderer {
     public int addProjectile(){
         if (ammo > 0){
             projectils[projCount].explode  =false;
-            projectils[projCount].z = -0.1f * time -1f;
+            projectils[projCount].z = -speed*time -1f;
             float[] m =  projectils[projCount].m;
             Matrix.setIdentityM(m, 0);
             Matrix.rotateM(m, 0,  -totalAngle, 0.0f, 0.0f, 1.0f);
